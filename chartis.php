@@ -22,7 +22,7 @@ function chartis_sitemap() {
 	$result = sprintf("%s<priority>1</priority>\n", $result);
 	$result = sprintf("%s</url>\n", $result);
 	$fp = (int) get_option('page_on_front');
-	$sql = sprintf("SELECT ID, post_type, post_title, post_modified_gmt FROM %s WHERE ID <> %s AND post_type IN('page', 'post', 'product') AND post_status = 'publish' AND post_password = '' ORDER BY post_type ASC, post_modified DESC", $wpdb->posts, $fp);
+	$sql = sprintf("SELECT ID, post_type, post_title, post_modified_gmt FROM %s WHERE ID <> %s AND post_type IN('page', 'post', 'portfolio', 'product') AND post_status = 'publish' AND post_password = '' ORDER BY post_type ASC, post_modified DESC", $wpdb->posts, $fp);
 	$posts = $wpdb->get_results($sql);
 	foreach ($posts as $post) {
 		if (strlen($post->post_title) > 0) {
