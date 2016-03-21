@@ -9,6 +9,11 @@ Author URI: http:// lutrov.com/
 */
 
 //
+// Constants used by this plugin.
+//
+define('CHARTIS_POST_TYPES', 'post|page|product|course');
+
+//
 //  Dynamically generate XML sitemap.
 //
 function chartis_sitemap() {
@@ -21,7 +26,7 @@ function chartis_sitemap() {
 	$result = sprintf("%s<changefreq>daily</changefreq>\n", $result);
 	$result = sprintf("%s<priority>1</priority>\n", $result);
 	$result = sprintf("%s</url>\n", $result);
-	$sql = sprintf("SELECT ID, post_type, post_title, post_modified_gmt FROM %s WHERE ID <> %s AND post_type IN(%s) AND post_status = 'publish' AND post_password = '' ORDER BY post_type ASC, post_modified DESC", $wpdb->posts, (int) get_option('page_on_front'), chartis_get_post_types());
+	$sql = sprintf("SELECT ID, post_type, post_title, post_modified_gmt FROM %s WHERE ID <> %s AND post_type IN (%s) AND post_status = 'publish' AND post_password = '' ORDER BY post_type ASC, post_modified DESC", $wpdb->posts, (int) get_option('page_on_front'), sprintf("'%s'", str_replace('|', "', '", CHARTIS_POST_TYPES)));
 	$posts = $wpdb->get_results($sql);
 	foreach ($posts as $post) {
 		if (strlen($post->post_title) > 0) {
@@ -42,25 +47,6 @@ function chartis_sitemap() {
 	header('Content-Type: text/xml');
 	printf("%s\n", $result);
 	exit();
-}
-
-//
-// Get all relevant post types.
-//
-function chartis_get_post_types() {
-	$result = null;
-	$skip = array('attachment', 'nav_menu_item', 'revision');
-	$types = get_post_types(null, 'names');
-	foreach ($types as $type) {
-		if (in_array($type, $skip) == false) {
-			if (strlen($result) > 0) {
-				$result = sprintf("%s, '%s'", $result, $type);
-			} else {
-				$result = sprintf("'%s'", $type);
-			}
-		}
-	}
-	return $result;
 }
 
 //
