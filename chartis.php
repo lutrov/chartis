@@ -17,6 +17,8 @@ function lutrov_chartis_post_types_filter($types) {
 }
 */
 
+defined('ABSPATH') || die('Ahem.');
+
 //
 //  Dynamically generate XML sitemap.
 //
