@@ -31,7 +31,7 @@ function chartis_sitemap() {
 	$result = sprintf("%s<priority>1</priority>\n", $result);
 	$result = sprintf("%s</url>\n", $result);
 	$fp = (int) get_option('page_on_front');
-	$sql = sprintf("SELECT ID, post_type, post_title, post_modified_gmt FROM %s WHERE ID <> %s AND post_type IN(%s) AND post_status = 'publish' AND post_password = '' ORDER BY post_type ASC, post_name ASC", $wpdb->posts, $fp, chartis_post_types());
+	$sql = sprintf("SELECT ID, post_type, post_title, post_modified_gmt FROM %s WHERE ID <> %s AND post_type IN (%s) AND post_status = 'publish' AND post_password = '' ORDER BY post_type ASC, post_name ASC", $wpdb->posts, $fp, chartis_post_types());
 	$posts = $wpdb->get_results($sql);
 	foreach ($posts as $post) {
 		if (strlen($post->post_title) > 0) {
@@ -57,6 +57,42 @@ function chartis_sitemap() {
 function chartis_post_types() {
 	$types = apply_filters('chartis_post_types_filter', array('page', 'post'));
 	return sprintf("'%s'", implode("', '", $types));
+}
+
+//
+// Update robots.txt file.
+//
+function chartis_robots_textfile($action) {
+	$path = sprintf('%s/robots.txt', rtrim(ABSPATH, '/'));
+	switch ($action) {
+		case 'install':
+			if (($fp = fopen($path, 'w'))) {
+				fwrite($fp, sprintf('Sitemap: %s/sitemap.xml', site_url()));
+				fclose($fp);
+			}
+			break;
+		case 'uninstall':
+			if (file_exists($path) == true) {
+				unlink($path);
+			}
+			break;
+	}
+}
+
+//
+// Register plugin activation hook.
+//
+register_activation_hook(__FILE__, 'chartis_activate');
+function chartis_activate() {
+	chartis_robots_textfile('install');
+}
+
+//
+// Register plugin deactivation hook.
+//
+register_deactivation_hook(__FILE__, 'chartis_deactivate');
+function chartis_deactivate() {
+	chartis_robots_textfile('uninstall');
 }
 
 //
