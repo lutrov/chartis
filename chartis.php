@@ -4,17 +4,9 @@
 Plugin Name: Chartis
 Description: Ensure that search engines know about all the <em>pages</em>, <em>posts</em> and <em>custom post types</em> on your site with this simple, dynamic XML sitemap generator. Why this plugin name? Chartis means "map" in Greek.
 Author: Ivan Lutrov
-Version: 2.0
 Author URI: http:// lutrov.com/
-Notes: This plugin provides a filter to modify the post types to include in the sitemap. See this example:
-// Add "movie", "book" and "product" custom post types.
-add_filter('chartis_post_types_filter', 'lutrov_chartis_post_types_filter', 10);
-function lutrov_chartis_post_types_filter($types) {
-	foreach (array('movie', 'book', 'product') as $type) {
-		array_push($types, $type);
-	}
-	return $types;
-}
+Version: 2.0
+Notes: This plugin provides an API to customise the default constant values and control the post types to include in the sitemap. See the "readme.md" file for more.
 */
 
 defined('ABSPATH') || die('Ahem.');
@@ -33,8 +25,8 @@ function chartis_sitemap() {
 	$result = sprintf("%s<priority>1</priority>\n", $result);
 	$result = sprintf("%s</url>\n", $result);
 	$fp = (int) get_option('page_on_front');
-	$sql = sprintf("SELECT ID, post_type, post_title, post_modified_gmt FROM %s WHERE ID <> %s AND post_type IN (%s) AND post_status = 'publish' AND post_password = '' ORDER BY post_type ASC, post_name ASC", $wpdb->posts, $fp, chartis_post_types());
-	$posts = $wpdb->get_results($sql);
+	$query = sprintf("SELECT ID, post_type, post_title, post_modified_gmt FROM %s WHERE ID <> %s AND post_type IN (%s) AND post_status = 'publish' AND post_password = '' ORDER BY post_type ASC, post_name ASC", $wpdb->posts, $fp, chartis_post_types());
+	$posts = $wpdb->get_results($query);
 	foreach ($posts as $post) {
 		if (strlen($post->post_title) > 0) {
 			$result = sprintf("%s<url>\n", $result);
@@ -49,7 +41,7 @@ function chartis_sitemap() {
 	header('HTTP/1.1 200 OK');
 	header('X-Robots-Tag: noindex, follow', true);
 	header('Content-Type: text/xml');
-	printf("%s\n", $result);
+	echo sprintf("%s\n", $result);
 	exit();
 }
 
