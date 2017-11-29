@@ -3,9 +3,10 @@
 /*
 Plugin Name: Chartis
 Description: Ensure that search engines know about all the <em>pages</em>, <em>posts</em> and <em>custom post types</em> on your site with this simple, dynamic XML sitemap generator. Why this plugin name? Chartis means "map" in Greek.
+Plugin URI: https://github.com/lutrov/chartis
 Author: Ivan Lutrov
 Author URI: http:// lutrov.com/
-Version: 2.0
+Version: 2.1
 Notes: This plugin provides an API to customise the default constant values and control the post types to include in the sitemap. See the "readme.md" file for more.
 */
 
