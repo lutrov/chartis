@@ -26,7 +26,7 @@ function chartis_init_action() {
 //  Dynamically generate XML sitemap.
 //
 function chartis_sitemap_action() {
-	$posts = get_posts(array(
+	$rows = get_posts(array(
 		'post_type' => apply_filters('chartis_post_types_filter', array('page', 'post')),
 		'orderby' => array('post_type' => 'ASC', 'title' => 'ASC'),
 		'exclude' => (int) get_option('page_on_front'),
@@ -40,12 +40,12 @@ function chartis_sitemap_action() {
 	$result = sprintf("%s<changefreq>daily</changefreq>\n", $result);
 	$result = sprintf("%s<priority>1</priority>\n", $result);
 	$result = sprintf("%s</url>\n", $result);
-	if (count($posts) > 0) {
-		foreach ($posts as $post) {
-			if (strlen($post->post_title) > 0) {
+	if (count($rows) > 0) {
+		foreach ($rows as $row) {
+			if (strlen($row->post_title) > 0) {
 				$result = sprintf("%s<url>\n", $result);
-				$result = sprintf("%s<loc>%s</loc>\n", $result, get_permalink($post->ID));
-				$result = sprintf("%s<lastmod>%s</lastmod>\n", $result, mysql2date('Y-m-d\TH:i:s+00:00', $post->post_modified_gmt, false));
+				$result = sprintf("%s<loc>%s</loc>\n", $result, get_permalink($row->ID));
+				$result = sprintf("%s<lastmod>%s</lastmod>\n", $result, mysql2date('Y-m-d\TH:i:s+00:00', $row->post_modified_gmt, false));
 				$result = sprintf("%s<changefreq>daily</changefreq>\n", $result);
 				$result = sprintf("%s<priority>0.8</priority>\n", $result);
 				$result = sprintf("%s</url>\n", $result);
