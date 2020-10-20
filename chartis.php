@@ -28,10 +28,7 @@ function chartis_init_action() {
 function chartis_sitemap_action() {
 	$result = array();
 	$args = array(
-		'post_type' => apply_filters(
-			'chartis_post_types_filter',
-			array('page', 'post')
-		),
+		'post_type' => apply_filters('chartis_post_types', array('page', 'post')),
 		'orderby' => array(
 			'post_type' => 'ASC',
 			'title' => 'ASC'
