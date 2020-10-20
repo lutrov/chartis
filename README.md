@@ -11,7 +11,7 @@ This project is licensed under the [GNU GPL](http://www.gnu.org/licenses/old-lic
 This plugin provides an API to customise the default constant values. See this example:
 
 	// ---- Change the Chartis plugin custom post types to include in the sitemap.
-	add_filter('chartis_post_types_filter', 'custom_chartis_post_types_filter');
+	add_filter('chartis_post_types', 'custom_chartis_post_types_filter');
 	function custom_chartis_post_types_filter($types) {
 		foreach (array('movie', 'book', 'product') as $type) {
 			array_push($types, $type);
