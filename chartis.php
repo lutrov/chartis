@@ -15,10 +15,10 @@ defined('ABSPATH') || die('Ahem.');
 //
 // Invoke plugin if XML sitemap requested.
 //
-add_action('plugins_loaded', 'chartis_init_action', 20);
+add_action('plugins_loaded', 'chartis_init_action', 40, 0);
 function chartis_init_action() {
 	if (preg_match('#/sitemap\.xml$#', $_SERVER['REQUEST_URI']) == 1) {
-		add_action('template_redirect', 'chartis_sitemap_action', 20);
+		add_action('template_redirect', 'chartis_sitemap_action', 40);
 	}
 }
 
@@ -26,37 +26,45 @@ function chartis_init_action() {
 //  Dynamically generate XML sitemap.
 //
 function chartis_sitemap_action() {
-	$rows = get_posts(array(
-		'post_type' => apply_filters('chartis_post_types_filter', array('page', 'post')),
-		'orderby' => array('post_type' => 'ASC', 'title' => 'ASC'),
+	$result = array();
+	$args = array(
+		'post_type' => apply_filters(
+			'chartis_post_types_filter',
+			array('page', 'post')
+		),
+		'orderby' => array(
+			'post_type' => 'ASC',
+			'title' => 'ASC'
+		),
 		'exclude' => (int) get_option('page_on_front'),
 		'posts_per_page' => -1
-	));
-	$result = sprintf("%s<?xml version=\"1.0\" encoding=\"%s\"?>\n", null, get_bloginfo('charset'));
-	$result = sprintf("%s<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd\">\n", $result);
-	$result = sprintf("%s<url>\n", $result);
-	$result = sprintf("%s<loc>%s</loc>\n", $result, home_url('/'));
-	$result = sprintf("%s<lastmod>%s</lastmod>\n", $result, mysql2date('Y-m-d\TH:i:s+00:00', get_lastpostmodified('GMT'), false));
-	$result = sprintf("%s<changefreq>daily</changefreq>\n", $result);
-	$result = sprintf("%s<priority>1</priority>\n", $result);
-	$result = sprintf("%s</url>\n", $result);
+	);
+	array_push($result, sprintf('<?xml version="1.0" encoding="%s"?>', get_bloginfo('charset')));
+	array_push($result, sprintf('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">'));
+	array_push($result, sprintf('<url>'));
+	array_push($result, sprintf('<loc>%s</loc>', home_url('/')));
+	array_push($result, sprintf('<lastmod>%s</lastmod>', mysql2date('Y-m-d\TH:i:s+00:00', get_lastpostmodified('GMT'), false)));
+	array_push($result, sprintf('<changefreq>daily</changefreq>'));
+	array_push($result, sprintf('<priority>1</priority>'));
+	array_push($result, sprintf('</url>'));
+	$rows = get_posts($args);
 	if (count($rows) > 0) {
 		foreach ($rows as $row) {
 			if (strlen($row->post_title) > 0) {
-				$result = sprintf("%s<url>\n", $result);
-				$result = sprintf("%s<loc>%s</loc>\n", $result, get_permalink($row->ID));
-				$result = sprintf("%s<lastmod>%s</lastmod>\n", $result, mysql2date('Y-m-d\TH:i:s+00:00', $row->post_modified_gmt, false));
-				$result = sprintf("%s<changefreq>daily</changefreq>\n", $result);
-				$result = sprintf("%s<priority>0.8</priority>\n", $result);
-				$result = sprintf("%s</url>\n", $result);
+				array_push($result, sprintf('<url>'));
+				array_push($result, sprintf('<loc>%s</loc>', get_permalink($row->ID)));
+				array_push($result, sprintf('<lastmod>%s</lastmod>', mysql2date('Y-m-d\TH:i:s+00:00', $row->post_modified_gmt, false)));
+				array_push($result, sprintf('<changefreq>daily</changefreq>'));
+				array_push($result, sprintf('<priority>0.8</priority>'));
+				array_push($result, sprintf('</url>'));
 			}
 		}
 	}
-	$result = sprintf("%s</urlset>", $result);
+	array_push($result, sprintf('</urlset>'));
 	header('HTTP/1.1 200 OK');
 	header('X-Robots-Tag: noindex, follow', true);
 	header('Content-Type: text/xml');
-	echo sprintf("%s\n", $result);
+	echo implode("\n", $result);
 	exit();
 }
 
