@@ -6,7 +6,7 @@ Description: Ensure that search engines know about all the <em>pages</em>, <em>p
 Plugin URI: https://github.com/lutrov/chartis
 Author: Ivan Lutrov
 Author URI: http:// lutrov.com/
-Version: 3.0
+Version: 4.0
 Notes: This plugin provides an API to customise the default constant values and control the post types to include in the sitemap. See the "readme.md" file for more.
 */
 
@@ -15,10 +15,12 @@ defined('ABSPATH') || die('Ahem.');
 //
 // Invoke plugin if XML sitemap requested.
 //
-add_action('plugins_loaded', 'chartis_init_action', 40, 0);
+add_action('plugins_loaded', 'chartis_init_action', 1, 0);
 function chartis_init_action() {
 	if (preg_match('#/sitemap\.xml$#', $_SERVER['REQUEST_URI']) == 1) {
-		add_action('template_redirect', 'chartis_sitemap_action', 40);
+		add_action('template_redirect', 'chartis_sitemap_action', 1, 0);
+		// Disable the intrinsic Wordpress sitemap
+		add_filter('wp_sitemaps_enabled', '__return_false');
 	}
 }
 
@@ -26,42 +28,29 @@ function chartis_init_action() {
 //  Dynamically generate XML sitemap.
 //
 function chartis_sitemap_action() {
-	$result = array();
+	$sitemap = array(home_url('/'));
 	$args = array(
 		'post_type' => apply_filters('chartis_post_types', array('page', 'post')),
-		'orderby' => array(
-			'post_type' => 'ASC',
-			'title' => 'ASC'
-		),
+		'post_status' => 'publish',
 		'exclude' => (int) get_option('page_on_front'),
 		'posts_per_page' => -1
 	);
-	array_push($result, sprintf('<?xml version="1.0" encoding="%s"?>', get_bloginfo('charset')));
-	array_push($result, sprintf('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">'));
-	array_push($result, sprintf('<url>'));
-	array_push($result, sprintf('<loc>%s</loc>', home_url('/')));
-	array_push($result, sprintf('<lastmod>%s</lastmod>', mysql2date('Y-m-d\TH:i:s+00:00', get_lastpostmodified('GMT'), false)));
-	array_push($result, sprintf('<changefreq>daily</changefreq>'));
-	array_push($result, sprintf('<priority>1</priority>'));
-	array_push($result, sprintf('</url>'));
 	$rows = get_posts($args);
-	if (count($rows) > 0) {
-		foreach ($rows as $row) {
-			if (strlen($row->post_title) > 0) {
-				array_push($result, sprintf('<url>'));
-				array_push($result, sprintf('<loc>%s</loc>', get_permalink($row->ID)));
-				array_push($result, sprintf('<lastmod>%s</lastmod>', mysql2date('Y-m-d\TH:i:s+00:00', $row->post_modified_gmt, false)));
-				array_push($result, sprintf('<changefreq>daily</changefreq>'));
-				array_push($result, sprintf('<priority>0.8</priority>'));
-				array_push($result, sprintf('</url>'));
-			}
+	foreach ($rows as $row) {
+		if (strlen($row->post_title) > 0) {
+			array_push($sitemap, get_permalink($row->ID));
 		}
 	}
-	array_push($result, sprintf('</urlset>'));
+	sort($sitemap);
 	header('HTTP/1.1 200 OK');
 	header('X-Robots-Tag: noindex, follow', true);
 	header('Content-Type: text/xml');
-	echo implode("\n", $result);
+	echo sprintf('<?xml version="1.0" encoding="%s"?>', get_bloginfo('charset'));
+	echo sprintf('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+	foreach ($sitemap as $location) {
+		echo sprintf('<url><loc>%s</loc></url>', $location);
+	}
+	echo sprintf('</urlset>');
 	exit();
 }
 
@@ -73,7 +62,7 @@ function chartis_robots_textfile($action) {
 	switch ($action) {
 		case 'install':
 			if (($fp = fopen($path, 'w'))) {
-				fwrite($fp, sprintf('Sitemap: %s/sitemap.xml', site_url()));
+				fwrite($fp, sprintf("User-Agent: *\nDisallow:\nSitemap: %s/sitemap.xml\n", site_url()));
 				fclose($fp);
 			}
 			break;
