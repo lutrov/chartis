@@ -41,7 +41,9 @@ function chartis_sitemap_action() {
 			array_push($sitemap, get_permalink($row->ID));
 		}
 	}
-	sort($sitemap);
+	if (count($sitemap) > 1) {
+		sort($sitemap);
+	}
 	header('HTTP/1.1 200 OK');
 	header('X-Robots-Tag: noindex, follow', true);
 	header('Content-Type: text/xml');
