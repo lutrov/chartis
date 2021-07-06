@@ -47,7 +47,7 @@ function chartis_sitemap_action() {
 		'post_type' => apply_filters('chartis_post_types', array('page', 'post', 'product', 'course')),
 		'post_status' => 'publish',
 		'exclude' => (int) get_option('page_on_front'),
-		'orderby'=> array('type'=>'DESC', 'title'=>'ASC'),
+		'orderby'=> array('type' => 'DESC', 'title' => 'ASC'),
 		'posts_per_page' => -1
 	);
 	$rows = get_posts($args);
