@@ -8,12 +8,12 @@ This project is licensed under the [GNU GPL](http://www.gnu.org/licenses/old-lic
 
 ## Documentation
 
-This plugin provides an API to customise the default constant values. See this example:
+This plugin automatically outputs "page", "post", "product", "course" post types but also provides an API to customise which post types get included. See this example:
 
 	// ---- Change the Chartis plugin custom post types to include in the sitemap.
 	add_filter('chartis_post_types', 'custom_chartis_post_types_filter');
 	function custom_chartis_post_types_filter($types) {
-		foreach (array('movie', 'book', 'product') as $type) {
+		foreach (array('movie', 'book') as $type) {
 			array_push($types, $type);
 		}
 		return $types;
