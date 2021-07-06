@@ -2,13 +2,12 @@
 
 /*
 Plugin Name: Chartis
-Plugin URI: https://github.com/lutrov/chartis
-Description: Ensure that search engines know about all the <em>pages</em>, <em>posts</em> and <em>custom post types</em> on your site with this simple, dynamic XML sitemap generator. Why this plugin name? Chartis means "map" in Greek.
 Version: 4.0
+Description: Ensure that search engines know about all the <em>pages</em>, <em>posts</em> and <em>custom post types</em> on your site with this simple, dynamic XML sitemap generator. Why this plugin name? Chartis means "map" in Greek.
+Plugin URI: https://github.com/lutrov/chartis
+Copyright: 2016, Ivan Lutrov
 Author: Ivan Lutrov
 Author URI: http:// lutrov.com/
-Notes: This plugin provides an API to customise the default constant values and control the post types to include in the sitemap. See the "readme.md" file for more.
-Copyright: 2016, Ivan Lutrov
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -45,9 +44,10 @@ function chartis_init_action() {
 function chartis_sitemap_action() {
 	$sitemap = array(home_url('/'));
 	$args = array(
-		'post_type' => apply_filters('chartis_post_types', array('page', 'post')),
+		'post_type' => apply_filters('chartis_post_types', array('page', 'post', 'product', 'course')),
 		'post_status' => 'publish',
 		'exclude' => (int) get_option('page_on_front'),
+		'orderby'=> array('type'=>'DESC', 'title'=>'ASC'),
 		'posts_per_page' => -1
 	);
 	$rows = get_posts($args);
